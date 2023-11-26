@@ -143,7 +143,7 @@ impl Filesystem for GilberFS {
         } else if let Ok(blob) = self.repo.get_blob_by_inode(ino.into()) {
             if let (Ok(offset), Ok(size)) = (usize::try_from(offset), usize::try_from(size)) {
                 let content = blob.as_ref().content();
-                reply.data(&content[offset..(offset + size)])
+                reply.data(&content[offset..(std::cmp::min(offset + size, content.len()))])
             } else {
                 // offset or size is too big for us to handle
                 reply.error(libc::EINVAL)
