@@ -80,6 +80,15 @@ impl GitRepo {
         self.get_tree(hash, root_tree)
     }
 
+    pub fn get_tree_by_branch(&mut self, name: &str) -> Result<GitTree> {
+        let branch = self.repo.find_branch(name, git2::BranchType::Local)?;
+        let commit = branch.get().peel_to_commit().unwrap();
+        drop(branch);
+        let root_tree = commit.tree_id();
+        drop(commit);
+        self.get_tree(root_tree, root_tree)
+    }
+
     pub fn get_tree(&mut self, commit: Oid, hash: Oid) -> Result<GitTree> {
         GitTree::try_from(self.get_object(commit, hash, Some(ObjectType::Tree))?)
     }

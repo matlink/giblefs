@@ -4,7 +4,7 @@ use anyhow::Result;
 use fuse::{
     FileAttr, FileType, Filesystem, ReplyAttr, ReplyData, ReplyDirectory, ReplyEntry, Request,
 };
-use git2::{ObjectType, Oid};
+use git2::{BranchType, ObjectType, Oid};
 use lazy_static::lazy_static;
 use libc::ENOENT;
 use log::{debug, error};
@@ -55,8 +55,10 @@ impl GilberFS {
     }
 
     fn lookup_commit(&mut self, hash: &str) -> Result<FileAttr> {
-        let oid = Oid::from_str(hash)?;
-        let commit = self.repo.get_tree_by_commit(oid)?;
+        let commit = match Oid::from_str(hash) {
+            Ok(o) => self.repo.get_tree_by_commit(o)?,
+            Err(_e) => self.repo.get_tree_by_branch(hash)?,
+        };
         Ok(commit.to_file_attr(self.builder.clone()))
     }
 }
