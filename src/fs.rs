@@ -165,8 +165,24 @@ impl Filesystem for GilberFS {
         offset: i64,
         mut reply: ReplyDirectory,
     ) {
+        // root of the mount point
         if ino == 1 {
-            reply.error(ENOENT);
+            // TODO: return all references (branches, commits)
+            if !(offset >= 1) {
+                reply.add(ino, 1, FileType::Directory, ".");
+            }
+            if !(offset >= 2) {
+                reply.add(1, 2, FileType::Directory, "..");
+            }
+            let branches = self.repo.get_all_branches();
+            let commits = self.repo.get_all_commits();
+            for b in branches {
+                reply.add(ino, 1, FileType::Directory, b);
+            }
+            for c in commits {
+                reply.add(ino, 2, FileType::Directory, c);
+            }
+            reply.ok();
             return;
         }
 

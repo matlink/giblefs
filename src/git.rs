@@ -104,4 +104,12 @@ impl GitRepo {
     pub fn get_blob_by_inode(&self, ino: Ino) -> Result<GitBlob> {
         GitBlob::try_from(self.get_object_by_inode(ino, Some(ObjectType::Blob))?)
     }
+
+    pub fn get_all_commits(&self) -> Vec<&str> {
+        vec!["1234"]
+    }
+
+    pub fn get_all_branches(&self) -> Vec<&str> {
+        self.repo.branches(None).unwrap_or_default(vec![])
+    }
 }
